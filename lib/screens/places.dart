@@ -1,20 +1,35 @@
+import 'package:demo6/models/place.dart';
 import 'package:demo6/store/place_list.dart';
 import 'package:demo6/screens/new_place.dart';
 import 'package:demo6/widgets/place_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Places extends ConsumerWidget {
+class Places extends ConsumerStatefulWidget {
   const Places({super.key});
+
+  @override
+  ConsumerState<Places> createState() {
+    return _PlacesState();
+  }
+}
+
+class _PlacesState extends ConsumerState<Places> {
+  late Future<void> _futurePlaces;
+
+  @override
+  void initState() {
+    super.initState();
+    _futurePlaces = ref.read(placeListProvider.notifier).loadFavoritePlaces();
+  }
 
   void _addItem(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => NewPlace()));
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final places = ref.watch(placeListProvider);
-
     Widget content = Center(
       child: Text(
         'No places added yet.',
@@ -44,7 +59,15 @@ class Places extends ConsumerWidget {
         ],
         backgroundColor: Colors.black,
       ),
-      body: content,
+      body: FutureBuilder(
+        future: _futurePlaces,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return content;
+        },
+      ),
     );
   }
 }

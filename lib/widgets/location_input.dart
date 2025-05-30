@@ -41,7 +41,6 @@ class _LocationInputState extends State<LocationInput> {
       isGettingLocation = true;
     });
     locationData = await location.getLocation();
-    print(locationData.longitude);
     setState(() {
       _pickedLocation = locationData;
       isGettingLocation = false;
